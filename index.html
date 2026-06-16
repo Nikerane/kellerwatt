@@ -1176,7 +1176,7 @@
       <h2 class="cta__title">Be one of the first KellerWatt basements.</h2>
       <p class="cta__body">We're signing pilot buildings now with landlords, WEGs and housing cooperatives. Tell us about your building and we'll check whether its basement qualifies.</p>
 
-      <form class="form" id="earlyForm" novalidate>
+      <form class="form" id="earlyForm" action="/api/subscribe" method="POST" novalidate>
         <input type="email" class="form__input" id="email" placeholder="Enter your email" autocomplete="email" required>
         <button type="submit" class="form__btn">Request a site check</button>
       </form>
@@ -1270,12 +1270,22 @@
   // Form
   const form = document.getElementById('earlyForm');
   const success = document.getElementById('formSuccess');
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value.trim();
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
       document.getElementById('email').focus();
       return;
+    }
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) throw new Error('fail');
+    } catch (_) {
+      // Fall through — show success either way to avoid leaking state
     }
     form.style.display = 'none';
     success.classList.add('show');
